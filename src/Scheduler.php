@@ -1,0 +1,163 @@
+<?php
+/**
+ * This file is part of riesenia/scheduler package.
+ *
+ * Licensed under the MIT License
+ * (c) RIESENIA.com
+ */
+
+declare(strict_types=1);
+
+namespace Riesenia\Scheduler;
+
+class Scheduler
+{
+    /** @var array<int,TermInterface[]> */
+    protected $items = [];
+
+    /** @var TermInterface[] */
+    protected $terms = [];
+
+    /**
+     * Create scheduler.
+     *
+     * @param int[]           $items
+     * @param TermInterface[] $terms
+     */
+    public function __construct(iterable $items, iterable $terms)
+    {
+        foreach ($items as $item) {
+            $this->addItem($item);
+        }
+
+        foreach ($terms as $term) {
+            $this->addTerm($term);
+        }
+    }
+
+    /**
+     * Schedule terms on items.
+     */
+    public function schedule()
+    {
+        if (!$this->items || !$this->terms) {
+            throw new \InvalidArgumentException('Set items and terms.');
+        }
+
+        // set locked terms first
+        foreach ($this->terms as $term) {
+            if ($term->getLockedId() === null || $term->getItemId() !== null) {
+                continue;
+            }
+
+            $id = $term->getLockedId();
+
+            // check terms already added to this item
+            foreach ($this->items[$id] as $occupied) {
+                if ($this->checkConflict($term, $occupied)) {
+                    $e = new SchedulerException();
+                    $e->setConflictingTerms([$term, $occupied]);
+
+                    throw $e;
+                }
+            }
+
+            $this->setTermItem($term, $id);
+        }
+
+        // remaining terms
+        foreach ($this->terms as $term) {
+            if ($term->getLockedId() !== null || $term->getItemId() !== null) {
+                continue;
+            }
+
+            #$isConflict = false;
+
+            // check already occupied terms for all items
+            foreach ($this->items as $id => $items) {
+                $isConflict = false;
+                $conflicts = [$term];
+
+                foreach ($items as $occupied) {
+                    if ($isConflict = $this->checkConflict($term, $occupied)) {
+                        $conflicts[] = $occupied;
+
+                        break;
+                    }
+                }
+
+                if (!$isConflict) {
+                    $this->setTermItem($term, $id);
+
+                    break;
+                }
+            }
+
+            if ($isConflict) {
+                $e = new SchedulerException();
+                $e->setConflictingTerms($conflicts);
+
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * Add item.
+     *
+     * @param int $id
+     */
+    public function addItem(int $id)
+    {
+        if (!isset($this->items[$id])) {
+            $this->items[$id] = [];
+        }
+    }
+
+    /**
+     * Add term.
+     *
+     * @param TermInterface $term
+     */
+    public function addTerm(TermInterface $term)
+    {
+        // reset
+        $term->setItemId(null);
+        $this->terms[] = $term;
+    }
+
+    /**
+     * Get terms.
+     *
+     * @return TermInterface[]
+     */
+    public function getTerms(): array
+    {
+        return $this->terms;
+    }
+
+    /**
+     * Check if two terms overlap.
+     *
+     * @param TermInterface $term1
+     * @param TermInterface $term2
+     *
+     * @return bool
+     */
+    private function checkConflict(TermInterface $term1, TermInterface $term2): bool
+    {
+        return $term1->getFrom() <= $term2->getTo() && $term2->getFrom() <= $term1->getTo();
+    }
+
+    /**
+     * Assign a term to an item.
+     *
+     * @param TermInterface $term
+     * @param int           $id
+     */
+    private function setTermItem(TermInterface $term, int $id)
+    {
+        $this->items[$id][] = $term;
+        $term->setItemId($id);
+    }
+}
