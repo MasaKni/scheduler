@@ -41,7 +41,7 @@ class Scheduler
     public function schedule()
     {
         if (!$this->items || !$this->terms) {
-            throw new \InvalidArgumentException('Set items and terms.');
+            throw new \InvalidArgumentException('Set at least one item and term.');
         }
 
         // set locked terms first
@@ -51,6 +51,10 @@ class Scheduler
             }
 
             $id = $term->getLockedId();
+
+            if (!isset($this->items[$id])) {
+                throw new \OutOfBoundsException('Term locked for unknown item.');
+            }
 
             // check terms already added to this item
             foreach ($this->items[$id] as $occupied) {
