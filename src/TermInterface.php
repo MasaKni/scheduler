@@ -15,16 +15,16 @@ interface TermInterface
     /**
      * Get event starting date.
      *
-     * @return \DateTimeImmutable
+     * @return \DateTimeInterface
      */
-    public function getFrom(): \DateTimeImmutable;
+    public function getFrom(): \DateTimeInterface;
 
     /**
      * Get event ending date.
      *
-     * @return \DateTimeImmutable
+     * @return \DateTimeInterface
      */
-    public function getTo(): \DateTimeImmutable;
+    public function getTo(): \DateTimeInterface;
 
     /**
      * Check if event is locked for specific item.
