@@ -46,14 +46,14 @@ class Scheduler
 
         // set locked terms first
         foreach ($this->terms as $term) {
-            if ($term->getLockedId() === null || $term->getItemId() !== null) {
+            if ($term->getLockedId() === null) {
                 continue;
             }
 
             $id = $term->getLockedId();
 
             if (!isset($this->items[$id])) {
-                throw new \OutOfBoundsException('Term locked for unknown item.');
+                throw new \OutOfBoundsException('Term locked to unknown item: ' . $id);
             }
 
             // check terms already added to this item
@@ -71,7 +71,7 @@ class Scheduler
 
         // remaining terms
         foreach ($this->terms as $term) {
-            if ($term->getLockedId() !== null || $term->getItemId() !== null) {
+            if ($term->getItemId() !== null) {
                 continue;
             }
 

@@ -57,8 +57,10 @@ class SchedulerSpec extends ObjectBehavior
 
         $term1->setItemId(1)->shouldBeCalled();
         $term2->setItemId(1)->shouldBeCalled();
+        $term2->getItemId()->willReturn(1);
         $term3->setItemId(2)->shouldBeCalled();
         $term4->setItemId(2)->shouldBeCalled();
+        $term4->getItemId()->willReturn(2);
 
         $this->addTerm($term5);
 
@@ -93,8 +95,10 @@ class SchedulerSpec extends ObjectBehavior
 
         $term1->setItemId(1)->shouldBeCalled();
         $term2->setItemId(1)->shouldBeCalled();
+        $term2->getItemId()->willReturn(1);
         $term3->setItemId(2)->shouldBeCalled();
         $term4->setItemId(2)->shouldBeCalled();
+        $term4->getItemId()->willReturn(2);
         $term5->setItemId(1)->shouldBeCalled();
 
         $this->schedule();
