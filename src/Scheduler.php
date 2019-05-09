@@ -41,7 +41,7 @@ class Scheduler
     public function schedule()
     {
         if (!$this->items || !$this->terms) {
-            throw new \InvalidArgumentException('Set at least one item and term.');
+            throw new \InvalidArgumentException('Set at least one item and term');
         }
 
         // set locked terms first
@@ -52,14 +52,19 @@ class Scheduler
 
             $id = $term->getLockedId();
 
+            // locked to not existing item
             if (!isset($this->items[$id])) {
-                throw new \OutOfBoundsException('Term locked to unknown item: ' . $id);
+                $e = new TermInvalidItemException('Term locked to unknown item: ' . $id);
+                $e->setTerm($term);
+                $e->setItem($id);
+
+                throw $e;
             }
 
             // check terms already added to this item
             foreach ($this->items[$id] as $occupied) {
                 if ($this->checkConflict($term, $occupied)) {
-                    $e = new SchedulerException();
+                    $e = new SchedulerException('Conflict in terms for item ' . $id);
                     $e->setConflictingTerms([$term, $occupied]);
 
                     throw $e;
@@ -96,7 +101,7 @@ class Scheduler
             }
 
             if ($isConflict) {
-                $e = new SchedulerException();
+                $e = new SchedulerException('Conflict in terms');
                 $e->setConflictingTerms($conflicts);
 
                 throw $e;
