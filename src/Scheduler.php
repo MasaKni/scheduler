@@ -80,10 +80,11 @@ class Scheduler
                 continue;
             }
 
+            $conflicts = [$term];
+
             // check already occupied terms for all items
             foreach ($this->items as $id => $items) {
                 $isConflict = false;
-                $conflicts = [$term];
 
                 foreach ($items as $occupied) {
                     if ($isConflict = $this->checkConflict($term, $occupied)) {
