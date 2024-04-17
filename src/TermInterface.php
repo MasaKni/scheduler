@@ -22,9 +22,9 @@ interface TermInterface
     /**
      * Get event ending date.
      *
-     * @return \DateTimeInterface
+     * @return \DateTimeInterface|null
      */
-    public function getTo(): \DateTimeInterface;
+    public function getTo(): ?\DateTimeInterface;
 
     /**
      * Check if event is locked for specific item.
