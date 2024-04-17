@@ -40,7 +40,7 @@ class Scheduler
      */
     public function schedule()
     {
-        if (!$this->items || !$this->terms) {
+        if (!$this->items && !$this->terms) {
             throw new \InvalidArgumentException('Set at least one item and term');
         }
 
